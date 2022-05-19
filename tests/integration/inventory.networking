@@ -1,0 +1,2 @@
+[isva]
+isva_container ansible_host="isva.iamlab.community.org" ansible_httpapi_port=9443 ansible_connection="httpapi" ansible_network_os="community.isva.isva" ansible_user="admin" ansible_password="Passw0rd" ansible_httpapi_use_ssl="yes" ansible_httpapi_validate_certs="no"

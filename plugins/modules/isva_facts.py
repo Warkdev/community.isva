@@ -15,7 +15,6 @@ short_description: Collect information from IBM ISVA devices
 description:
   - Collect information from IBM ISVA devices.
 version_added: "1.0.0"
-extends_documentation_fragment: community.isva.modules.isva
 author:
   - Cédric Servais (@7893254)
 '''
