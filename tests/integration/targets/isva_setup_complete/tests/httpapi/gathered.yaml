@@ -1,0 +1,9 @@
+---
+- name: Checking First Steps status
+  community.isva.isva_setup_complete:
+    state: gathered
+  register: gather
+
+- assert:
+    that:
+      - gather.gathered.configured | bool
