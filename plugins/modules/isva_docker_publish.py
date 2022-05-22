@@ -10,10 +10,10 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: isva_setup_complete
-short_description: Collect information about the First Steps Setup process.
+module: isva_docker_publish
+short_description: Publish the current configuration to the shared volume
 description:
-  - Collect information about the First Steps Setup process.
+  - Publish the current configuration to the shared volume
 version_added: "1.0.0"
 extends_documentation_fragment: community.isva.modules.isva
 author:
@@ -21,22 +21,15 @@ author:
 '''
 
 EXAMPLES = r'''
-- name: Collect ISVA First Steps status
-  isva_setup_complete:
-    state: gathered
-
-- name: Accept ISVA First Steps status
-  isva_setup_complete:
-    configured: True
-    state: replaced
+- name: Publish current configuration to the shared volume
+  isva_docker_publish:
+    state: published
 '''
 
 RETURN = r'''
-gathered:
-  description: A boolean indicating whether the service agreements have been accepted.
-  returned: queried
-  type: bool
-  sample: true
+after:
+  description: The file name of the published configuration created/update on the shared volume.
+  type: str
 '''
 
 import logging
@@ -44,7 +37,7 @@ from io import StringIO
 
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.community.isva.plugins.module_utils.isva_setup_complete import fetch_first_steps, complete_first_steps
+from ansible_collections.community.isva.plugins.module_utils.isva_docker_publish import publish_configuration
 
 from ansible_collections.community.isva.plugins.module_utils.isva_utils import (
   create_return_object, create_return_error, setup_logging, update_logging_info
@@ -58,43 +51,27 @@ class ArgumentSpec(object):
   def __init__(self):
     self.supports_check_mode = True
     argument_spec = dict(
-      state=dict(type='str', required=True, choices=['replaced', 'gathered']),
-      configured=dict(type='bool', choices=[True]),
+      state=dict(type='str', required=True, choices=['published']),
       log_level=dict(type='str', default='INFO', choices=['CRITICAL', 'FATAL', 'ERROR', 'WARN', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'])
     )
     self.argument_spec = {}
     self.argument_spec.update(argument_spec)
-    self.required_if = [
-      ('state', 'replaced', ('configured'), True)
-    ]
 
-def __exec_gathered(module):
-  response = fetch_first_steps(module=module)
-  return response
-
-def __exec_replaced(module, **kwargs):
+def __exec_published(module):
   check_mode = module.check_mode
-  configured = module.params['configured']
-  if kwargs.pop('configured') != configured:
-    logger.debug('Completing First steps setup')
-    if check_mode:
-      return {'changed': True, 'after': {'configured': True}}
+  logger.debug('Publishing docker configuration')
+  if check_mode:
+    return {'changed': True, 'after': {'filename': 'check_mode.snapshot'}}
 
-    complete_first_steps()
-    return {'changed': True, 'after': {'configured': True}}
-
-  return {'changed': False, 'after': {'configured': True}}
+  response = publish_configuration(module)
+  return {'changed': True, 'after': response}
 
 def exec_module(module):
   state = module.params['state']
 
-  if state == 'gathered':
-    response = __exec_gathered(module=module)
-    return {'gathered': response}
-  elif state == 'replaced':
-    before = fetch_first_steps(module=module)
-    response = __exec_replaced(module=module, **before)
-    return {'changed': response['changed'], 'diff': {'before': before, 'after': response['after']}}
+  if state == 'published':
+    response = __exec_published(module=module)
+    return {'changed': response['changed'], 'diff': {'before': {}, 'after': response['after']}}
 
   return {}
 

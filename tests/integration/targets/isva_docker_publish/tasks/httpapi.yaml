@@ -1,0 +1,10 @@
+---
+- name: run test cases (connection=httpapi)
+  include_tasks:
+     file: "{{ test_case_to_run }}"
+  vars:
+     ansible_connection: httpapi
+  loop:
+  - "{{ role_path }}/tests/httpapi/published.yaml"
+  loop_control:
+    loop_var: test_case_to_run

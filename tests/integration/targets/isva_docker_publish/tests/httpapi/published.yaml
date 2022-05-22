@@ -1,0 +1,10 @@
+---
+- name: Publishing ISVA Docker Configuration to the shared volume
+  community.isva.isva_docker_publish:
+    state: published
+  register: publish
+
+- assert:
+    that:
+      - publish.changed | bool
+      - publish.diff.after.filename != ''
