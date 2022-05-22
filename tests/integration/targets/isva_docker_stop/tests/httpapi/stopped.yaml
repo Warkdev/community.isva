@@ -1,0 +1,47 @@
+---
+- name: Starting container through Docker collection
+  community.docker.docker_container:
+    name: isvaconfig
+    state: started
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "https://isva.iamlab.community.org:9443/core/login"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+- name: Removing docker healthcheck
+  community.docker.docker_container:
+    name: isvaconfig
+    state: started
+    healthcheck:
+      test: ["NONE"]
+
+- name: Stopping ISVA Docker Configuration Container
+  community.isva.isva_docker_stop:
+    state: stopped
+  register: state
+
+- assert:
+    that:
+      - state.changed | bool
+      - state.diff.after.state == 'stopped'
+      - state.diff.before.state == 'started'
+
+- name: Starting container through Docker collection after test
+  community.docker.docker_container:
+    name: isvaconfig
+    state: started
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "https://isva.iamlab.community.org:9443/core/login"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+- name: Removing docker healthcheck
+  community.docker.docker_container:
+    name: isvaconfig
+    state: started
+    healthcheck:
+      test: ["NONE"]
