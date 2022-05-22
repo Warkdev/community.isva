@@ -1,0 +1,25 @@
+---
+- name: Gathering current state of service agreements
+  community.isva.isva_service_agreements:
+    state: gathered
+  register: current
+
+- name: Accepting ISVA service agreements
+  community.isva.isva_service_agreements:
+    state: replaced
+    accepted: True
+  register: result
+
+- assert:
+    that:
+      - result.changed | bool == True
+      - result.diff.before.accepted | bool == False
+      - result.diff.after.accepted | bool == True
+  when: current.gathered.accepted | bool == False
+
+- assert:
+    that:
+      - result.changed | bool == False
+      - result.diff.before.accepted | bool == True
+      - result.diff.after.accepted | bool == True
+  when: current.gathered.accepted | bool

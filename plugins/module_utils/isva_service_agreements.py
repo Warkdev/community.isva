@@ -9,20 +9,36 @@ __metaclass__ = type
 
 from ansible_collections.community.isva.plugins.module_utils.isva_utils import parse_fail_message
 from ansible_collections.community.isva.plugins.module_utils.common import ISVAModuleError
+from ansible.module_utils.connection import Connection
+
+import logging
 
 uri = '/setup_service_agreements/accepted'
 
-def fetch_service_agreements(connection):
-    """ This function fetch the service agreements state from the appliance.
+logger = logging.getLogger(__name__)
 
-    Args:
-        connection (Connection): _description_
+def fetch_service_agreements(module):
+    """ This function fetch the service agreements state from the appliance.
 
     Returns:
         _type_: _description_
     """
-    response = connection.send_request(url=uri)
+    connection = Connection(module._socket_path)
+    response = connection.send_request(path=uri)
 
+    if response['code'] != 200:
+        raise ISVAModuleError(parse_fail_message(response['code'], response['contents']))
+
+    return response['contents']
+
+def accept_service_agreements(module, **kwargs):
+    connection = Connection(module._socket_path)
+    accepted = kwargs.pop('accepted')
+    data = {
+        'accepted': str(accepted)
+    }
+    response = connection.send_request(path=uri, method='PUT', payload=data)
+    
     if response['code'] != 200:
         raise ISVAModuleError(parse_fail_message(response['code'], response['contents']))
 
