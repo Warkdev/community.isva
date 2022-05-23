@@ -1,0 +1,24 @@
+---
+- name: Gathering current state of outstanding changes
+  community.isva.isva_pending_changes:
+    state: gathered
+  register: current
+
+- name: Rollback ISVA pending changes
+  community.isva.isva_pending_changes:
+    state: rollback
+  register: result
+
+- assert:
+    that:
+      - result.changed | bool == True
+      - result.diff.before.changes | length
+      - result.diff.after.changes | length == 0
+  when: current.gathered.changes | length
+
+- assert:
+    that:
+      - result.changed | bool == False
+      - result.diff.before.changes | length == 0
+      - result.diff.after.changes | length == 0
+  when: current.gathered.changes | length == 0
