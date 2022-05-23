@@ -48,5 +48,10 @@ def update_logging_info(return_value, stdout='', stderr=''):
 def create_return_error(msg='', stdout='', stderr=''):
     return {'msg': msg, 'stdout': stdout, 'stdout_lines': stdout.splitlines(), 'stderr': stderr, 'stderr_lines': stderr.splitlines()}
 
-def create_return_object(changed=False, failed=False, rc=0, skipped=False, stderr='', stderr_lines=[], stdout='', stdout_lines=[]):
+def create_return_object(changed=False, failed=False, rc=0, skipped=False, stderr='', stderr_lines=None, stdout='', stdout_lines=None):
+    if not stderr_lines:
+        stderr_lines = []
+    if not stdout_lines:
+        stdout_lines = []
+
     return {'changed': changed, 'failed': failed, 'rc': rc, 'skipped': skipped, 'stderr': stderr, 'stderr_lines': stderr_lines, 'stdout': stdout, 'stdout_lines': stdout_lines}
