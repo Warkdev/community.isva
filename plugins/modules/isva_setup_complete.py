@@ -80,7 +80,7 @@ def __exec_replaced(module, **kwargs):
     if check_mode:
       return {'changed': True, 'after': {'configured': True}}
 
-    complete_first_steps()
+    complete_first_steps(module=module)
     return {'changed': True, 'after': {'configured': True}}
 
   return {'changed': False, 'after': {'configured': True}}
