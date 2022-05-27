@@ -1,0 +1,62 @@
+---
+- name: Configuring Postgresql database (creation check)
+  community.isva.isva_database_config:
+    hvdb:
+      db_type: postgresql
+      address: postgresql
+      port: 5432
+      user: postgres
+      password: Passw0rd
+      db_name: isva
+      secure: True
+      failover_servers: []
+    state: replaced
+  register: result
+
+- assert:
+    that:
+      - result.changed
+      - result.warnings = 
+
+- name: Re-configuring Postgresql database (idempotency check)
+  community.isva.isva_database_config:
+    hvdb:
+      db_type: postgresql
+      address: postgresql
+      port: 5432
+      user: postgres
+      db_name: isva
+      secure: True
+      failover_servers: []
+    state: replaced
+  register: result
+
+- assert:
+    that:
+      - not result.changed
+
+- name: Configuring Postgresql database with password checks
+  community.isva.isva_database_config:
+    hvdb:
+      db_type: postgresql
+      address: postgresql
+      port: 5432
+      user: postgres
+      password: Passw0rd
+      db_name: isva
+      secure: True
+      failover_servers: []
+    state: replaced
+  register: result
+
+- assert:
+    that:
+      - result.changed
+
+- name: Retrieving pending changes
+  community.isva.isva_pending_changes:
+    state: gathered
+
+- name: Rolling back configuration
+  community.isva.isva_pending_changes:
+    state: rollbacked
