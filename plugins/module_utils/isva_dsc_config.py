@@ -14,23 +14,24 @@ from ansible.module_utils.connection import Connection
 import logging
 import json
 
-uri = '/isam/cluster/v2'
+uri = '/isam/dsc/config'
 
 logger = logging.getLogger(__name__)
 
 MAP_API_ATTRIBUTES = {
-    'db_type': 'hvdb_db_type',
-    'address': 'hvdb_address',
-    'port': 'hvdb_port',
-    'user': 'hvdb_user',
-    'password': 'hvdb_password',
-    'db_name': 'hvdb_db_name',
-    'secure': 'hvdb_db_secure',
-    'db2_alt_address': 'hvdb_db2_alt_address',
-    'db2_alt_port': 'hvdb_db2_alt_port',
-    'truststore': 'hvdb_db_truststore',
-    'driver_type': 'hvdb_driver_type',
-    'failover_servers': 'hvdb_failover_servers'
+    'worker_threads': 'worker_threads',
+    'max_session_lifetime': 'max_session_lifetime',
+    'client_grace': 'client_grace',
+    'connection_idle_timeout': 'connection_idle_timeout',
+    'service_port': 'service_port',
+    'replication_port': 'replication_port',
+    'servers': 'servers'
+}
+
+MAP_API_SERVER_ATTRIBUTES = {
+    'ip': 'ip',
+    'service_port': 'service_port',
+    'replication_port': 'replication_port'
 }
 
 
@@ -60,8 +61,20 @@ def to_api(want):
     return data
 
 
-def fetch_database_configuration(module):
-    """ This function fetch the database configuration from the appliance.
+def get_default():
+    return {
+        'servers': [],
+        'worker_threads': 64,
+        'replication_port': 444,
+        'client_grace': 600,
+        'max_session_lifetime': 3600,
+        'connection_idle_timeout': 0,
+        'service_port': 443
+    }
+
+
+def fetch_dsc_configuration(module):
+    """ This function fetch the dsc configuration from the appliance.
 
     Returns:
         _type_: _description_
@@ -75,24 +88,13 @@ def fetch_database_configuration(module):
     return response['contents']
 
 
-def update_database_configuration(module, payload):
+def update_dsc_configuration(module, payload):
     connection = Connection(module._socket_path)
     payload = json.dumps(payload)
 
     response = connection.send_request(path=uri, method='PUT', payload=payload)
 
-    if response['code'] != 200:
-        raise ISVAModuleError(parse_fail_message(response['code'], response['contents']))
-
-    return response['contents']
-
-
-def create_database_configuration(module, payload):
-    connection = Connection(module._socket_path)
-    payload = json.dumps(payload)
-    response = connection.send_request(path=uri, method='POST', payload=payload)
-
-    if response['code'] != 200:
+    if response['code'] != 204:
         raise ISVAModuleError(parse_fail_message(response['code'], response['contents']))
 
     return response['contents']

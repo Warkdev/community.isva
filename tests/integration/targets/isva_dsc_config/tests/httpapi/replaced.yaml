@@ -1,0 +1,62 @@
+---
+- name: Configuring DSC for the first time
+  community.isva.isva_dsc_config:
+    dsc:
+      worker_threads: 5
+      max_session_lifetime: 120
+      client_grace: 60
+      connection_idle_timeout: 27
+      service_port: 38
+      replication_port: 39
+      servers:
+        - ip: isvadsc1
+          service_port: 123
+          replication_port: 124
+        - ip: isvadsc2
+          service_port: 125
+          replication_port: 126
+        - ip: isvadsc3
+          service_port: 127
+          replication_port: 128
+        - ip: isvadsc4
+          service_port: 129
+          replication_port: 130
+    state: replaced
+  register: result
+
+- assert:
+    that:
+      - result.changed
+
+- name: Re-configuring DSC (idempotency check)
+  community.isva.isva_dsc_config:
+    dsc:
+      worker_threads: 5
+      max_session_lifetime: 120
+      client_grace: 60
+      connection_idle_timeout: 27
+      service_port: 38
+      replication_port: 39
+      servers:
+        - ip: isvadsc1
+          service_port: 123
+          replication_port: 124
+        - ip: isvadsc2
+          service_port: 125
+          replication_port: 126
+        - ip: isvadsc3
+          service_port: 127
+          replication_port: 128
+        - ip: isvadsc4
+          service_port: 129
+          replication_port: 130
+    state: replaced
+  register: result
+
+- assert:
+    that:
+      - not result.changed
+
+- name: Rolling back configuration
+  community.isva.isva_pending_changes:
+    state: rollbacked

@@ -1,0 +1,23 @@
+---
+- name: Checking ISVA DSC Information
+  community.isva.isva_dsc_config:
+    state: gathered
+  register: gather
+
+- assert:
+    that:
+      - gather.gathered.servers is defined
+      - gather.gathered.servers == []
+      - gather.gathered.worker_threads is defined
+      - gather.gathered.worker_threads == 64
+      - gather.gathered.replication_port is defined
+      - gather.gathered.replication_port == 444
+      - gather.gathered.client_grace is defined
+      - gather.gathered.client_grace == 600
+      - gather.gathered.max_session_lifetime is defined
+      - gather.gathered.max_session_lifetime == 3600
+      - gather.gathered.connection_idle_timeout is defined
+      - gather.gathered.connection_idle_timeout == 0
+      - gather.gathered.service_port is defined
+      - gather.gathered.service_port == 443
+  when: gather.gathered

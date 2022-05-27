@@ -12,7 +12,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: isva_database_config
+module: isva_dsc_config
 short_description: Collect information about the First Steps Setup process.
 description:
   - Collect information about the First Steps Setup process.
@@ -23,7 +23,7 @@ author:
 
 EXAMPLES = r'''
 - name: Collect ISVA First Steps status
-  isva_database_config:
+  isva_dsc_config:
     state: gathered
 '''
 
@@ -37,14 +37,12 @@ gathered:
 
 import logging
 from io import StringIO
-import json
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.common.dict_transformations import recursive_diff
 
-from ansible_collections.community.isva.plugins.module_utils.isva_database_config import (
-    to_api, from_api, from_module,
-    create_database_configuration, fetch_database_configuration
+from ansible_collections.community.isva.plugins.module_utils.isva_dsc_config import (
+    to_api, from_api, from_module, fetch_dsc_configuration, update_dsc_configuration, get_default
 )
 
 from ansible_collections.community.isva.plugins.module_utils.isva_utils import (
@@ -59,41 +57,33 @@ error_log = StringIO()
 class ArgumentSpec(object):
     def __init__(self):
         self.supports_check_mode = True
-        failover_spec = dict(
-            address=dict(type='str', required=True),
-            port=dict(type='int', required=True),
-            order=dict(type='int', required=True)
+        server_spec = dict(
+            ip=dict(type='str', required=True),
+            service_port=dict(type='int', required=True),
+            replication_port=dict(type='int', required=True)
         )
-        hvdb_spec = dict(
-            db_type=dict(type='str', required=True, choices=['db2', 'postgresql', 'oracle']),
-            address=dict(type='str', required=True),
-            port=dict(type='int', required=True),
-            user=dict(type='str', required=True),
-            password=dict(type='str', required=False, no_log=True),
-            db_name=dict(type='str', required=True),
-            secure=dict(type='bool', required=True, choices=[True, False]),
-            # DB2 specific
-            db2_alt_address=dict(type='str', required=False),
-            db2_alt_port=dict(type='int', required=False),
-            # Oracle specific
-            truststore=dict(type='str', required=False),
-            driver_type=dict(type='str', required=False),
-            # Postgresql specific
-            failover_servers=dict(type='list', elements='dict', options=failover_spec, required=False)
+        dsc_spec = dict(
+            worker_threads=dict(type='int', required=True),
+            max_session_lifetime=dict(type='int', required=True),
+            client_grace=dict(type='int', required=True),
+            connection_idle_timeout=dict(type='int', required=True),
+            service_port=dict(type='int', required=True),
+            replication_port=dict(type='int', required=True),
+            servers = dict(type='list', elements='dict', options=server_spec)
         )
         argument_spec = dict(
-            state=dict(type='str', required=True, choices=['gathered', 'replaced']),
-            hvdb=dict(type='dict', required=False, options=hvdb_spec)
+            state=dict(type='str', required=True, choices=['gathered', 'replaced', 'deleted']),
+            dsc=dict(type='dict', required=False, options=dsc_spec)
         )
         self.argument_spec = {}
         self.argument_spec.update(argument_spec)
         self.required_if = [
-            ['state', 'replaced', ['hvdb'], True]
+            ['state', 'replaced', ['dsc'], True]
         ]
 
 
 def __exec_gathered(module):
-    response = fetch_database_configuration(module=module)
+    response = fetch_dsc_configuration(module=module)
     data = from_api(response)
     return data
 
@@ -101,7 +91,7 @@ def __exec_gathered(module):
 def __exec_replaced(module, **kwargs):
     check_mode = module.check_mode
     have = kwargs
-    want = from_module(module.params['hvdb'])
+    want = from_module(module.params['dsc'])
 
     diff = recursive_diff(have, want)
     if diff:  # Execute only if there were changes
@@ -110,13 +100,31 @@ def __exec_replaced(module, **kwargs):
         if check_mode:
             return {'changed': True, 'diff': {'before': diff[0], 'after': diff[1]}}
 
-        response = create_database_configuration(module=module, payload=payload)
+        response = update_dsc_configuration(module=module, payload=payload)
         if 'warning' in response:
             return {'changed': True, 'diff': {'before': diff[0], 'after': diff[1]}, 'warnings': [response['warning']]}
         return {'changed': True, 'diff': {'before': diff[0], 'after': diff[1]}}
 
     return {'changed': False}
 
+def __exec_deleted(module, **kwargs):
+    check_mode = module.check_mode
+    have = kwargs
+    want = get_default()
+
+    diff = recursive_diff(have, want)
+    if diff:  # Execute only if there were changes
+        payload = to_api(want)
+
+        if check_mode:
+            return {'changed': True, 'diff': {'before': diff[0], 'after': diff[1]}}
+
+        response = update_dsc_configuration(module=module, payload=payload)
+        if 'warning' in response:
+            return {'changed': True, 'diff': {'before': diff[0], 'after': diff[1]}, 'warnings': [response['warning']]}
+        return {'changed': True, 'diff': {'before': diff[0], 'after': diff[1]}}
+
+    return {'changed': False}
 
 def exec_module(module):
     state = module.params['state']
@@ -127,6 +135,10 @@ def exec_module(module):
     elif state == 'replaced':
         before = __exec_gathered(module=module)
         response = __exec_replaced(module=module, **before)
+        return response
+    elif state == 'deleted':
+        before = __exec_gathered(module=module)
+        response = __exec_deleted(module=module, **before)
         return response
 
     return {}

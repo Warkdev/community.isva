@@ -53,10 +53,6 @@
       - result.changed
       - result.diff.after.password is defined
 
-- name: Retrieving pending changes
-  community.isva.isva_pending_changes:
-    state: gathered
-
 - name: Rolling back configuration
   community.isva.isva_pending_changes:
     state: rollbacked
