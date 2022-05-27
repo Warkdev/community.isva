@@ -12,10 +12,12 @@ from ansible_collections.community.isva.plugins.module_utils.common import ISVAM
 from ansible.module_utils.connection import Connection
 
 import logging
+import json
 
 uri = '/setup_service_agreements/accepted'
 
 logger = logging.getLogger(__name__)
+
 
 def fetch_service_agreements(module):
     """ This function fetch the service agreements state from the appliance.
@@ -31,14 +33,14 @@ def fetch_service_agreements(module):
 
     return response['contents']
 
+
 def accept_service_agreements(module, **kwargs):
     connection = Connection(module._socket_path)
     accepted = kwargs.pop('accepted')
-    data = {
-        'accepted': str(accepted)
-    }
-    response = connection.send_request(path=uri, method='PUT', payload=data)
-    
+    payload = json.dump({'accepted': str(accepted)})
+
+    response = connection.send_request(path=uri, method='PUT', payload=payload)
+
     if response['code'] != 200:
         raise ISVAModuleError(parse_fail_message(response['code'], response['contents']))
 

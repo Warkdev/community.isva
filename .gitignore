@@ -475,6 +475,7 @@ $RECYCLE.BIN/
 
 # Ansible stuff
 tests/output
+ansible.log
 
 # End of https://www.toptal.com/developers/gitignore/api/git,linux,pydev,python,windows,pycharm+all,jupyternotebook,vim,webstorm,emacs,dotenv
 © 2022 GitHub, Inc.

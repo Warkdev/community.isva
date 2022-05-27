@@ -17,6 +17,7 @@ uri = '/core/sys/versions'
 
 logger = logging.getLogger(__name__)
 
+
 def fetch_system_version(module):
     """ This function fetch the system version information from the appliance.
 

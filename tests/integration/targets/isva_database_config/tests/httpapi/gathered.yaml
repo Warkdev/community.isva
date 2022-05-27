@@ -1,0 +1,35 @@
+---
+- name: Checking ISVA HVDB Information
+  community.isva.isva_database_config:
+    state: gathered
+  register: gather
+
+- assert:
+    that:
+      - gather.gathered.db_type is defined
+      - gather.gathered.address is defined
+      - gather.gathered.port is defined
+      - gather.gathered.user is defined
+      - gather.gathered.db_name is defined
+      - gather.gathered.secure is defined
+  when: gather.gathered
+
+- assert:
+    that:
+      - gather.gathered.driver_type is defined
+  when: 
+  - gather.gathered
+  - gather.gathered.db_type == 'oracle'
+
+- assert:
+    that:
+      - gather.gathered.db_truststore is defined
+  when: 
+  - gather.gathered
+  - gather.gathered.db_type == 'oracle' and gather.gathered.secure
+
+- assert:
+    that: []
+  when:
+  - gather.gathered
+  - gather.gathered.db_type == 'db2'

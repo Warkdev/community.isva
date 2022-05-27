@@ -28,6 +28,7 @@ from ansible_collections.community.isva.plugins.module_utils.constants import (
 
 from ansible_collections.community.isva.plugins.module_utils.common import ISVAModuleError
 
+
 class HttpApi(HttpApiBase):
     def __init__(self, connection):
         super(HttpApi, self).__init__(connection)
@@ -51,7 +52,7 @@ class HttpApi(HttpApiBase):
 
         try:
             self._display_request(method, path, payload)
-            response, response_data = self.connection.send(path, payload, method=method, headers=BASE_HEADERS)
+            response, response_data = self.connection.send(path, payload, method=method, headers=headers)
             response_value = self._get_response_value(response_data)
             return dict(
                 code=response.getcode(),
@@ -59,6 +60,9 @@ class HttpApi(HttpApiBase):
             )
         except HTTPError as e:
             return dict(code=e.code, contents=json.loads(e.read()))
+
+    def update_auth(self, response, response_text):
+        return None  # We want to explicitely disable any sort of caching so that authentication happens for every request.
 
     def _display_request(self, method, url, data=None):
         if data:

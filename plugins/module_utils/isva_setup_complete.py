@@ -17,6 +17,7 @@ uri = '/setup_complete'
 
 logger = logging.getLogger(__name__)
 
+
 def fetch_first_steps(module):
     """ This function fetch the first steps state from the appliance.
 
@@ -31,10 +32,11 @@ def fetch_first_steps(module):
 
     return response['contents']
 
+
 def complete_first_steps(module):
     connection = Connection(module._socket_path)
     response = connection.send_request(path=uri, method='PUT')
-    
+
     if response['code'] != 200:
         raise ISVAModuleError(parse_fail_message(response['code'], response['contents']))
 

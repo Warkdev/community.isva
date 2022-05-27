@@ -4,9 +4,9 @@
     state: gathered
   register: current
 
-- name: Rollback ISVA pending changes
+- name: Deploying ISVA pending changes
   community.isva.isva_pending_changes:
-    state: rollback
+    state: deployed
   register: result
 
 - assert:

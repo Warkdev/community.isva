@@ -10,6 +10,7 @@ from ansible.module_utils.parsing.convert_bool import (
     BOOLEANS_TRUE, BOOLEANS_FALSE
 )
 
+
 def flatten_boolean(value):
     truthy = list(BOOLEANS_TRUE) + ['enabled', 'True', 'true']
     falsey = list(BOOLEANS_FALSE) + ['disabled', 'False', 'false']
@@ -20,8 +21,10 @@ def flatten_boolean(value):
     elif value in falsey:
         return 'no'
 
+
 class Noop(object):
     pass
+
 
 class ISVAModuleError(Exception):
     pass

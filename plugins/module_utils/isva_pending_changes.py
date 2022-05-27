@@ -12,10 +12,12 @@ from ansible_collections.community.isva.plugins.module_utils.common import ISVAM
 from ansible.module_utils.connection import Connection
 
 import logging
+import json
 
 uri = '/isam/pending_changes'
 
 logger = logging.getLogger(__name__)
+
 
 def fetch_pending_changes(module):
     """ This function fetch the list of pending changes from the appliance.
@@ -31,6 +33,7 @@ def fetch_pending_changes(module):
 
     return response['contents']
 
+
 def count_pending_changes(module):
     """ This function fetch the number of pending changes from the appliance.
 
@@ -45,6 +48,7 @@ def count_pending_changes(module):
 
     return response['contents']
 
+
 def deploy_changes(module):
     """This function deploy the list of outsanding changes
 
@@ -58,6 +62,7 @@ def deploy_changes(module):
         raise ISVAModuleError(parse_fail_message(response['code'], response['contents']))
 
     return response['contents']
+
 
 def rollback_changes(module):
     """This function rollback the list of outsanding changes

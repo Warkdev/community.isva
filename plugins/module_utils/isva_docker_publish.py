@@ -17,6 +17,7 @@ uri = '/docker/publish'
 
 logger = logging.getLogger(__name__)
 
+
 def publish_configuration(module):
     """ This function publish the current configuration to the shared volume.
 

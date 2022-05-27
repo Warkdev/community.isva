@@ -1,12 +1,12 @@
 ---
 - name: run test cases (connection=httpapi)
   include_tasks:
-     file: "{{ test_case_to_run }}"
+    file: "{{ test_case_to_run }}"
   vars:
-     ansible_connection: httpapi
+    ansible_connection: httpapi
+    ansible_persistent_log_messages: True
   loop:
   - "{{ role_path }}/tests/httpapi/gathered.yaml"
-  - "{{ role_path }}/tests/httpapi/deployed.yaml"
-  - "{{ role_path }}/tests/httpapi/rollbacked.yaml"
+  - "{{ role_path }}/tests/httpapi/replaced.yaml"
   loop_control:
     loop_var: test_case_to_run

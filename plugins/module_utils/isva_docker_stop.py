@@ -17,6 +17,7 @@ uri = '/docker/stop'
 
 logger = logging.getLogger(__name__)
 
+
 def stop_container(module):
     """ This function stop the configuration container
 
