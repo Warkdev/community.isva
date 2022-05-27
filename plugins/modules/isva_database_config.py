@@ -104,18 +104,19 @@ def __exec_replaced(module, **kwargs):
     have = kwargs
     want = from_module(module.params['hvdb'])
 
-    if recursive_diff(have, want):  # Execute only if there were changes
+    diff = recursive_diff(have, want)
+    if diff:  # Execute only if there were changes
         payload = to_api(want)
 
         if check_mode:
-            return {'changed': True, 'after': want}
+            return {'changed': True, 'diff': {'before': diff[0], 'after': diff[1]}}
 
         response = create_database_configuration(module=module, payload=payload)
         if 'warning' in response:
-            return {'changed': True, 'after': want, 'warnings': [response['warning']]}
-        return {'changed': True, 'after': want}
+            return {'changed': True, 'diff': {'before': diff[0], 'after': diff[1]}, 'warnings': [response['warning']]}
+        return {'changed': True, 'diff': {'before': diff[0], 'after': diff[1]}}
 
-    return {'changed': False, 'after': want}
+    return {'changed': False}
 
 
 def exec_module(module):
@@ -127,7 +128,7 @@ def exec_module(module):
     elif state == 'replaced':
         before = __exec_gathered(module=module)
         response = __exec_replaced(module=module, **before)
-        return {'changed': response['changed'], 'diff': {'before': before, 'after': response['after']}, 'warnings': response.get('warnings', [])}
+        return response
 
     return {}
 
