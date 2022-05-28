@@ -1,0 +1,44 @@
+---
+- name: Checking ISVA Administrator Settings
+  community.isva.isva_administrator_setting_facts:
+
+- assert:
+    that:
+      - isva_administrator_settings is defined
+      - isva_administrator_settings.heap_size is defined
+      - isva_administrator_settings.heap_size.min is defined
+      - isva_administrator_settings.heap_size.max is defined
+      - isva_administrator_settings.session is defined
+      - isva_administrator_settings.session.timeout is defined
+      - isva_administrator_settings.session.ba_timeout is defined
+      - isva_administrator_settings.session.inactive_timeout is defined
+      - isva_administrator_settings.session.cache_purge is defined
+      - isva_administrator_settings.http_port is defined
+      - isva_administrator_settings.https_port is defined
+      - isva_administrator_settings.sshd_client_alive_interval is defined
+      - isva_administrator_settings.swap_file_size is defined
+      - isva_administrator_settings.threads is defined
+      - isva_administrator_settings.threads.min is defined
+      - isva_administrator_settings.threads.max is defined
+      - isva_administrator_settings.max_pool_size is defined
+      - isva_administrator_settings.lmi_debug is defined
+      - isva_administrator_settings.console_log_level is defined
+      - isva_administrator_settings.client_certs is defined
+      - isva_administrator_settings.client_certs.accept is defined
+      - isva_administrator_settings.client_certs.validate_identity is defined
+      - isva_administrator_settings.client_certs.exclude_csrf_pattern is defined
+      - isva_administrator_settings.tls is defined
+      - isva_administrator_settings.tls.server_protocol is defined
+      - isva_administrator_settings.tls.enabled_protocol is defined
+      - isva_administrator_settings.files is defined
+      - isva_administrator_settings.files.max is defined
+      - isva_administrator_settings.files.max_size is defined
+      - isva_administrator_settings.proxy is defined
+      - isva_administrator_settings.proxy.http is defined
+      - isva_administrator_settings.proxy.https is defined
+      - isva_administrator_settings.login is defined
+      - isva_administrator_settings.login.header is defined
+      - isva_administrator_settings.login.message is defined
+      - isva_administrator_settings.access_log_format is defined
+      - isva_administrator_settings.lmi_message_timeout is defined
+      - isva_administrator_settings.valid_verify_domains is defined
