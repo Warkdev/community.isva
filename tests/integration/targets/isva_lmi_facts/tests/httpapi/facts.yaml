@@ -1,0 +1,8 @@
+---
+- name: Checking ISVA LMI status
+  community.isva.isva_lmi_facts:
+
+- assert:
+    that:
+      - isva_lmi_status is defined
+      - isva_lmi_status.start_time is defined
