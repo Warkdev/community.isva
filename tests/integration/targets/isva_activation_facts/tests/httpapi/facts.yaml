@@ -1,0 +1,7 @@
+---
+- name: Checking ISVA Activations
+  community.isva.isva_activation_facts:
+
+- assert:
+    that:
+      - isva_offerings is defined
