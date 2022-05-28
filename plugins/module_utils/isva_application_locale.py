@@ -14,12 +14,12 @@ from ansible.module_utils.connection import Connection
 import json
 import logging
 
-uri = '/adv_params'
+uri = '/isam/applang/v1'
 
 logger = logging.getLogger(__name__)
 
 MAP_API_ATTRIBUTES = {
-    'advanced_tuning_parameters': 'tuningParameters'
+    'application_locale': 'id'
 }
 
 
@@ -27,14 +27,13 @@ def from_api(source):
     data = {}
     for _, value in MAP_API_ATTRIBUTES.items():
         if value in source and source[value] is not None:
-            for param in source[value]:
-                data[param['key']] = {'value': param['value'], 'comment': param['comment']}
+            data = source[value]
 
     return data
 
 
-def fetch_advanced_tuning_parameters(module):
-    """ This function fetch the advanced tuning parameters from the appliance
+def fetch_application_locale(module):
+    """ This function fetch the application locale from the appliance
 
     Returns:
         _type_: _description_

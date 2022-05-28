@@ -71,6 +71,7 @@ def from_api(source):
 
     return data
 
+
 def fetch_administrator_settings(module):
     """ This function fetch the administrator settings information from the appliance
 

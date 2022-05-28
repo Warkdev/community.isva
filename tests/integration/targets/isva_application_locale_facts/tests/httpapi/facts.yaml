@@ -1,0 +1,7 @@
+---
+- name: Checking ISVA Application Locale
+  community.isva.isva_application_locale_facts:
+
+- assert:
+    that:
+      - isva_application_locale is defined
