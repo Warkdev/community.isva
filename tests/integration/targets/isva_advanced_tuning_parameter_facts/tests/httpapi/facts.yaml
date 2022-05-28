@@ -1,0 +1,7 @@
+---
+- name: Checking ISVA Advanced Tuning Parameters
+  community.isva.isva_advanced_tuning_parameter_facts:
+
+- assert:
+    that:
+      - isva_advanced_tuning_parameters is defined
