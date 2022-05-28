@@ -1,0 +1,12 @@
+---
+- name: Checking ISVA System Information
+  community.isva.isva_version_facts:
+
+- assert:
+    that:
+      - isva_product_name is defined
+      - isva_product_description is defined
+      - isva_firmware_version is defined
+      - isva_firmware_build is defined
+      - isva_firmware_label is defined
+      - isva_deployment_model is defined

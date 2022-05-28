@@ -10,7 +10,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: isva_system_version
+module: isva_version_facts
 short_description: Collect information about the First Steps Setup process.
 description:
   - Collect information about the First Steps Setup process.
@@ -21,8 +21,7 @@ author:
 
 EXAMPLES = r'''
 - name: Collect ISVA First Steps status
-  isva_system_version:
-    state: gathered
+  isva_version_facts:
 '''
 
 RETURN = r'''
@@ -38,7 +37,7 @@ from io import StringIO
 
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.community.isva.plugins.module_utils.isva_system_version import fetch_system_version
+from ansible_collections.community.isva.plugins.module_utils.isva_version_facts import fetch_system_version
 
 from ansible_collections.community.isva.plugins.module_utils.isva_utils import (
     create_return_object, create_return_error, setup_logging, update_logging_info
@@ -53,27 +52,21 @@ class ArgumentSpec(object):
     def __init__(self):
         self.supports_check_mode = True
         argument_spec = dict(
-            state=dict(type='str', required=True, choices=['gathered']),
             log_level=dict(type='str', default='INFO', choices=['CRITICAL', 'FATAL', 'ERROR', 'WARN', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'])
         )
         self.argument_spec = {}
         self.argument_spec.update(argument_spec)
 
 
-def __exec_gathered(module):
+def __exec_get_facts(module):
     response = fetch_system_version(module=module)
     return response
 
 
 def exec_module(module):
-    state = module.params['state']
-
-    if state == 'gathered':
-        response = __exec_gathered(module=module)
-        return {'gathered': response}
-
-    return {}
-
+    response = __exec_get_facts(module=module)
+    ansible_facts = {'isva_{}'.format(key): response[key] for key in response}
+    return {'ansible_facts': ansible_facts}
 
 def main():
     spec = ArgumentSpec()
