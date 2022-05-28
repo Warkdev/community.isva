@@ -1,0 +1,7 @@
+---
+- name: Checking ISVA Extensions
+  community.isva.isva_extension_facts:
+
+- assert:
+    that:
+      - isva_extensions is defined
