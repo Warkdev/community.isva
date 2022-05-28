@@ -1,0 +1,7 @@
+---
+- name: Checking ISVA Fixpack
+  community.isva.isva_fixpack_facts:
+
+- assert:
+    that:
+      - isva_fixpacks is defined

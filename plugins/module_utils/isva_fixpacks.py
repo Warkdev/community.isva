@@ -14,13 +14,13 @@ from ansible.module_utils.connection import Connection
 import json
 import logging
 
-uri = '/fixpacks/fipsmode'
+uri = '/fixpacks'
 
 logger = logging.getLogger(__name__)
 
 
 def fetch_fixpacks(module):
-    """ This function fetch the fixpacks fipsmode information from the appliance
+    """ This function fetch the fixpacks information from the appliance
 
     Returns:
         _type_: _description_
