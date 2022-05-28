@@ -20,10 +20,6 @@ author:
 '''
 
 EXAMPLES = r'''
-- name: Collect ISVA First Steps status
-  isva_setup_complete:
-    state: gathered
-
 - name: Accept ISVA First Steps status
   isva_setup_complete:
     configured: True
@@ -58,20 +54,12 @@ class ArgumentSpec(object):
     def __init__(self):
         self.supports_check_mode = True
         argument_spec = dict(
-            state=dict(type='str', required=True, choices=['replaced', 'gathered']),
-            configured=dict(type='bool', choices=[True]),
+            state=dict(type='str', required=True, choices=['replaced']),
+            configured=dict(type='bool', required=True, choices=[True]),
             log_level=dict(type='str', default='INFO', choices=['CRITICAL', 'FATAL', 'ERROR', 'WARN', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'])
         )
         self.argument_spec = {}
         self.argument_spec.update(argument_spec)
-        self.required_if = [
-            ['state', 'replaced', ['configured'], True]
-        ]
-
-
-def __exec_gathered(module):
-    response = fetch_first_steps(module=module)
-    return response
 
 
 def __exec_replaced(module, **kwargs):
@@ -91,10 +79,7 @@ def __exec_replaced(module, **kwargs):
 def exec_module(module):
     state = module.params['state']
 
-    if state == 'gathered':
-        response = __exec_gathered(module=module)
-        return {'gathered': response}
-    elif state == 'replaced':
+    if state == 'replaced':
         before = fetch_first_steps(module=module)
         response = __exec_replaced(module=module, **before)
         return {'changed': response['changed'], 'diff': {'before': before, 'after': response['after']}}
@@ -106,8 +91,7 @@ def main():
     spec = ArgumentSpec()
     module = AnsibleModule(
         argument_spec=spec.argument_spec,
-        supports_check_mode=spec.supports_check_mode,
-        required_if=spec.required_if
+        supports_check_mode=spec.supports_check_mode
     )
     try:
         setup_logging(str_log, module._verbosity)

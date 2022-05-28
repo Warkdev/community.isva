@@ -5,6 +5,6 @@
   vars:
      ansible_connection: httpapi
   loop:
-  - "{{ role_path }}/tests/httpapi/replaced.yaml"
+  - "{{ role_path }}/tests/httpapi/facts.yaml"
   loop_control:
     loop_var: test_case_to_run

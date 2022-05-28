@@ -1,0 +1,7 @@
+---
+- name: Checking ISVA first steps status
+  community.isva.isva_first_step_facts:
+
+- assert:
+    that:
+      - isva_first_step_configured is defined

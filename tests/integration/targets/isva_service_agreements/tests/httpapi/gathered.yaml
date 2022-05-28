@@ -1,9 +1,0 @@
----
-- name: Checking ISVA service agreements
-  community.isva.isva_service_agreements:
-    state: gathered
-  register: gather
-
-- assert:
-    that:
-      - gather.gathered.accepted | bool

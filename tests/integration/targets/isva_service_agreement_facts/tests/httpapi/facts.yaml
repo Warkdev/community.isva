@@ -1,0 +1,7 @@
+---
+- name: Checking ISVA service agreements
+  community.isva.isva_service_agreement_facts:
+
+- assert:
+    that:
+      - isva_service_agreements_accepted is defined
