@@ -1,0 +1,7 @@
+---
+- name: Checking ISVA Licenses
+  community.isva.isva_license_facts:
+
+- assert:
+    that:
+      - isva_licenses is defined
