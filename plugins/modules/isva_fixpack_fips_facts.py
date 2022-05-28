@@ -10,7 +10,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: isva_first_step_facts
+module: isva_fixpack_fips_facts
 short_description: Collect information about the First Steps Setup process.
 description:
   - Collect information about the First Steps Setup process.
@@ -20,8 +20,8 @@ author:
 '''
 
 EXAMPLES = r'''
-- name: Collect ISVA First Steps status
-  isva_first_step_facts:
+- name: Collect ISVA Fixpacks fips mode status
+  isva_fixpack_fips_facts:
 '''
 
 RETURN = r'''
@@ -32,7 +32,7 @@ from io import StringIO
 
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.community.isva.plugins.module_utils.isva_setup_complete import fetch_first_steps
+from ansible_collections.community.isva.plugins.module_utils.isva_fixpacks_fips import fetch_fixpacks
 
 from ansible_collections.community.isva.plugins.module_utils.isva_utils import (
     create_return_object, create_return_error, setup_logging, update_logging_info
@@ -54,16 +54,14 @@ class ArgumentSpec(object):
 
 
 def __exec_get_facts(module):
-    response = fetch_first_steps(module=module)
+    response = fetch_fixpacks(module=module)
     return response
 
 
 def exec_module(module):
     response = __exec_get_facts(module=module)
-    ansible_facts = {'isva_first_step_configured': response['configured']}
-
+    ansible_facts = {'isva_fixpacks_fipsmode': response}
     return {'ansible_facts': ansible_facts}
-
 
 def main():
     spec = ArgumentSpec()

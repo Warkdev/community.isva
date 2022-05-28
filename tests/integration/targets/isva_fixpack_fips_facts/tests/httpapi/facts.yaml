@@ -1,0 +1,7 @@
+---
+- name: Checking ISVA Fixpacks fipsmode
+  community.isva.isva_fixpack_fips_facts:
+
+- assert:
+    that:
+      - isva_fixpacks_fipsmode is defined

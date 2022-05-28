@@ -65,7 +65,6 @@ def __exec_get_facts(module):
 
 def exec_module(module):
     response = __exec_get_facts(module=module)
-    logger.info(response)
     ansible_facts = {'isva_extensions': {ext['id']: {'name': ext['name'], 'desc': ext['desc'], 'date': ext['date']} for ext in response }}
     return {'ansible_facts': ansible_facts}
 
