@@ -9,5 +9,6 @@ __metaclass__ = type
 import os
 
 BASE_HEADERS = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+BASE_DOWNLOAD_FILE_HEADERS = {'Accept': 'application/json,application/octet-stream', 'Connection': 'keep-alive'}
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))

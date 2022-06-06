@@ -4,7 +4,6 @@
     file: "{{ test_case_to_run }}"
   vars:
     ansible_connection: httpapi
-    ansible_persistent_log_messages: True
   loop:
   - "{{ role_path }}/tests/httpapi/gathered.yaml"
   - "{{ role_path }}/tests/httpapi/replaced.yaml"

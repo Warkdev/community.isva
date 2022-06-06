@@ -1,0 +1,93 @@
+---
+- name: Downloading wrong path
+  community.isva.isva_shared_volumes_fetch:
+    path: snapshot
+    file: isva_10.0.3.1_published.snapshot
+    dest: /tmp/isva_10.0.3.1_published.snapshot
+  register: fetched
+  ignore_errors: True
+
+- assert:
+    that:
+      - fetched.failed
+
+- name: Downloading non-existing file
+  community.isva.isva_shared_volumes_fetch:
+    path: snapshots
+    file: isva_9.0.0.0_published.snapshot
+    dest: /tmp/isva_9.0.0.0_published.snapshot
+  register: fetched
+  ignore_errors: True
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isva_9.0.0.0_published.snapshot
+  register: stat_result
+
+- assert:
+    that:
+      - fetched.failed
+      - fetched.msg == 'The requested file does not exist snapshots/isva_9.0.0.0_published.snapshot'
+      - not stat_result.stat.exists
+
+- name: Removing file
+  file:
+    path: /tmp/isva_10.0.3.1_published.snapshot
+    state: absent
+
+- name: Downloading ISVA Shared Volume
+  community.isva.isva_shared_volumes_fetch:
+    path: snapshots
+    file: isva_10.0.3.1_published.snapshot
+    dest: /tmp/isva_10.0.3.1_published.snapshot
+  register: fetched
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isva_10.0.3.1_published.snapshot
+    checksum_algorithm: sha256
+  register: stat_result
+
+- assert:
+    that:
+    - fetched.changed
+    - stat_result.stat.exists
+
+- name: Re-downloading ISVA Shared Volume, idempotency
+  community.isva.isva_shared_volumes_fetch:
+    path: snapshots
+    file: isva_10.0.3.1_published.snapshot
+    dest: /tmp/isva_10.0.3.1_published.snapshot
+  register: fetched
+
+- assert:
+    that:
+    - not fetched.changed
+
+- name: Removing file
+  file:
+    path: /tmp/isva_10.0.3.1_published.snapshot
+    state: absent
+
+- name: Downloading ISVA Shared Volume through list
+  community.isva.isva_shared_volumes_fetch:
+    files:
+      - path: snapshots
+        name: isva_10.0.3.1_published.snapshot
+        dest: /tmp/isva_10.0.3.1_published.snapshot
+  register: fetched
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isva_10.0.3.1_published.snapshot
+  register: stat_result
+
+- assert:
+    that:
+    - fetched.changed
+    - stat_result.stat.exists
+
+- name: Removing file
+  file:
+    path: /tmp/isva_10.0.3.1_published.snapshot
+    state: absent

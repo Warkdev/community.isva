@@ -81,3 +81,16 @@ def create_return_object(changed=False, failed=False, rc=0, skipped=False, stder
             'stdout': stdout,
             'stdout_lines': stdout_lines,
             'warnings': warnings}
+
+
+def convert_filesystem_to_dict(filesystem):
+    ret = {}
+    for entry in filesystem:
+        if entry['type'] == 'Directory':
+            ret[entry['name']] = {}
+            if entry['children']:
+                ret[entry['name']].update(convert_filesystem_to_dict(entry['children']))
+        elif entry['type'] == 'File':
+            ret[entry['name']] = entry
+
+    return ret

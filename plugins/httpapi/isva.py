@@ -23,7 +23,7 @@ from ansible.plugins.httpapi import HttpApiBase
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 
 from ansible_collections.community.isva.plugins.module_utils.constants import (
-    BASE_HEADERS
+    BASE_HEADERS, BASE_DOWNLOAD_FILE_HEADERS
 )
 
 from ansible_collections.community.isva.plugins.module_utils.common import ISVAModuleError
@@ -36,6 +36,7 @@ class HttpApi(HttpApiBase):
         self.user = None
 
     def handle_httperror(self, exc):
+        self._display_message("Handle error: {}".format(str(exc)))
         if exc.code == 404:
             # 404 errors need to be handled upstream due to exists methods relying on it.
             # Other codes will be raised by underlying connection plugin.
@@ -61,8 +62,23 @@ class HttpApi(HttpApiBase):
         except HTTPError as e:
             return dict(code=e.code, contents=json.loads(e.read()))
 
+    def download_file(self, path, dest, headers=None):
+        headers = headers if headers is not None else BASE_DOWNLOAD_FILE_HEADERS
+        method = 'GET'
+        self._display_request(method, path, dest)
+
+        try:
+            self._display_request(method, path, None)
+            self.connection.get_file(path=path, dest=dest, data=None, method=method, headers=headers)
+        except HTTPError as e:
+            self._display_message('HTTPError: {}'.format(str(e)))
+            return dict(code=e.code, contents=json.loads(e.read()))
+
+        return True
+
     def update_auth(self, response, response_text):
         return None  # We want to explicitely disable any sort of caching so that authentication happens for every request.
+
 
     def _display_request(self, method, url, data=None):
         if data:
