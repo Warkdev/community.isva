@@ -69,12 +69,20 @@
     path: /tmp/isva_10.0.3.1_published.snapshot
     state: absent
 
+- name: Removing file
+  file:
+    path: /tmp/isva_10.0.3.1_20220601-220252_isvaconfig.support
+    state: absent
+
 - name: Downloading ISVA Shared Volume through list
   community.isva.isva_shared_volumes_fetch:
     files:
       - path: snapshots
         name: isva_10.0.3.1_published.snapshot
         dest: /tmp/isva_10.0.3.1_published.snapshot
+      - path: support
+        name: isva_10.0.3.1_20220601-220252_isvaconfig.support
+        dest: /tmp/isva_10.0.3.1_20220601-220252_isvaconfig.support
   register: fetched
 
 - name: Retrieving stat of file
@@ -87,7 +95,53 @@
     - fetched.changed
     - stat_result.stat.exists
 
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isva_10.0.3.1_20220601-220252_isvaconfig.support
+  register: stat_result
+
+- assert:
+    that:
+    - fetched.changed
+    - stat_result.stat.exists
+
+- name: Downloading ISVA Shared Volume through list for idempotency
+  community.isva.isva_shared_volumes_fetch:
+    files:
+      - path: snapshots
+        name: isva_10.0.3.1_published.snapshot
+        dest: /tmp/isva_10.0.3.1_published.snapshot
+      - path: support
+        name: isva_10.0.3.1_20220601-220252_isvaconfig.support
+        dest: /tmp/isva_10.0.3.1_20220601-220252_isvaconfig.support
+  register: fetched
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isva_10.0.3.1_published.snapshot
+  register: stat_result
+
+- assert:
+    that:
+    - not fetched.changed
+    - stat_result.stat.exists
+
 - name: Removing file
   file:
     path: /tmp/isva_10.0.3.1_published.snapshot
+    state: absent
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isva_10.0.3.1_20220601-220252_isvaconfig.support
+  register: stat_result
+
+- assert:
+    that:
+    - not fetched.changed
+    - stat_result.stat.exists
+
+- name: Removing file
+  file:
+    path: /tmp/isva_10.0.3.1_20220601-220252_isvaconfig.support
     state: absent

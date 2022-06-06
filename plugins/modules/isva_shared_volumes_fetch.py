@@ -83,14 +83,26 @@ def exec_module(module):
     check_mode = module.check_mode  # We donwload files also in checkmode.
     remote_files = convert_filesystem_to_dict(fetch_shared_volumes(module))
     files = module.params.get('files') or [{'path': module.params['path'], 'name': module.params['file'], 'dest': module.params['dest']}]
+    changed = False
+    diff = {
+        'before': [],
+        'after': []
+    }
     for f in files:
         path = f['path']
         volume = f['name']
         dest = f['dest']
 
-        return {'changed': download_shared_volumes(module, path, volume, dest, remote_files)}
+        result = download_shared_volumes(module, path, volume, dest, remote_files)
+        if result:
+            diff['before'].append({'path': dest, 'state': 'absent'})
+        else:
+            diff['before'].append({'path': dest, 'state': 'file'})
 
-    return {'changed': True}
+        diff['after'].append({'path': dest, 'state': 'file'})
+        changed = changed or result
+
+    return {'changed': changed, 'diff': diff}
 
 
 def main():
