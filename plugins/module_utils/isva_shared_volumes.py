@@ -14,6 +14,7 @@ from ansible.module_utils.connection import Connection
 import json
 import logging
 import os
+import base64
 
 uri = '/shared_volume'
 ALLOWED_PATH = ['fixpacks', 'snapshots', 'support']
@@ -89,7 +90,7 @@ def download_shared_volumes(module, path, volume, dest, remote_files={}):
     return True
 
 
-def upload_shared_volumes(module, path, volume, src, overwrite=False):
+def upload_shared_volumes(module, path, volume, src, overwrite=False, remote_files={}, check_mode=False):
     """This function will upload the requested shared volume file.
     """
     _check_path(path)
@@ -97,18 +98,33 @@ def upload_shared_volumes(module, path, volume, src, overwrite=False):
     if not os.path.isfile(src):
         raise ISVAModuleError('The source file is not valid {}'.format(src))
 
+    if path in remote_files and volume in remote_files[path]:
+        want = module.sha256(src)
+        have = remote_files[path][volume]['sha256']
+        if want == have:  # The remote file is already the right one, no need to import
+            return False
+        elif not overwrite:
+            raise ISVAModuleError('You are trying to import a file which already exist, set overwrite: True to force this operation. Concerned file: {}'.format(src))
+
+    if check_mode:
+        return True
+
+    raise ISVAModuleError('This function is not supported yet')
+
     with open(src, 'rb') as f:
-        data = {
-            'file': f.read(),
+        headers = {'Accept': 'application/json', 'Content-Type': 'application/octet-stream'}
+        b64_file = base64.b64encode(f.read()).decode('utf-8')
+        payload = json.dumps({
+            'file': b64_file,
             'force': overwrite
-        }
+        })
 
         target_uri = '{}/{}/{}'.format(uri, path, volume)
 
         connection = Connection(module._socket_path)
-        response = connection.send_request(path=target_uri, method='POST', data=data)
+        response = connection.send_request(path=target_uri, method='POST', payload=payload, headers=headers)
 
         if response['code'] != 200:
             raise ISVAModuleError(parse_fail_message(response['code'], response['contents']))
 
-        return response['contents']
+        return True

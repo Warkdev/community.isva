@@ -10,7 +10,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: isva_shared_volumes_fetch
+module: isva_shared_volumes_import
 short_description: Collect information about the service agreements status of the appliance
 description:
   - Collect service agreements status from IBM ISVA devices.
@@ -21,7 +21,7 @@ author:
 
 EXAMPLES = r'''
 - name: Accept ISVA Service Agreement
-  isva_shared_volumes_fetch:
+  isva_shared_volumes_import:
     accepted: True
     state: replaced
 '''
@@ -39,7 +39,7 @@ from io import StringIO
 
 from ansible.module_utils.basic import AnsibleModule
 
-from ansible_collections.community.isva.plugins.module_utils.isva_shared_volumes import fetch_shared_volumes, download_shared_volumes
+from ansible_collections.community.isva.plugins.module_utils.isva_shared_volumes import fetch_shared_volumes, upload_shared_volumes
 
 from ansible_collections.community.isva.plugins.module_utils.isva_utils import (
     create_return_object, create_return_error, setup_logging, update_logging_info, convert_filesystem_to_dict
@@ -54,55 +54,55 @@ class ArgumentSpec(object):
     def __init__(self):
         self.supports_check_mode = True
         file_spec = dict(
-            name=dict(type='str', required=True),
+            name=dict(type='str', required=False),
             path=dict(type='str', required=True, choices=['fixpacks', 'snapshots', 'support']),
-            dest=dict(type='str', required=True)
+            src=dict(type='str', required=True),
+            overwrite=dict(type='bool', default=False)
         )
         argument_spec = dict(
             files=dict(type='list', required=False, elements='dict', options=file_spec),
             path=dict(type='str', required=False, choices=['fixpacks', 'snapshots', 'support']),
             name=dict(type='str', required=False),
-            dest=dict(type='str', required=False),
+            src=dict(type='str', required=False),
+            overwrite=dict(type='bool', default=False),
             log_level=dict(type='str', default='INFO', choices=['CRITICAL', 'FATAL', 'ERROR', 'WARN', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'])
         )
         self.argument_spec = {}
         self.argument_spec.update(argument_spec)
         self.required_one_of = [
             ['files', 'path'],
-            ['files', 'name'],
-            ['files', 'dest']
+            ['files', 'src']
         ]
         self.mutually_exclusive = [
             ['files', 'path'],
-            ['files', 'name'],
-            ['files', 'dest']
+            ['files', 'src']
         ]
 
 
 def exec_module(module):
     check_mode = module.check_mode  # We donwload files also in checkmode.
     remote_files = convert_filesystem_to_dict(fetch_shared_volumes(module))
-    files = module.params.get('files') or [{'path': module.params['path'], 'name': module.params['name'], 'dest': module.params['dest']}]
-    changed = False
+    files = module.params.get('files') or [{'path': module.params['path'], 'name': module.params['name'], 'src': module.params['src'], 'overwrite': module.params['overwrite']}]
     diff = {
         'before': [],
         'after': []
     }
+    changed = False
     for f in files:
         path = f['path']
         volume = f['name']
-        dest = f['dest']
+        src = f['src']
+        overwrite = f['overwrite']
 
-        result = download_shared_volumes(module, path, volume, dest, remote_files)
+        result = upload_shared_volumes(module, path, volume, src, overwrite, remote_files, check_mode)
         if result:
-            diff['before'].append({'path': dest, 'state': 'absent'})
+            diff['before'].append({'path': '{}/{}'.format(path, volume), 'state': 'absent'})
         else:
-            diff['before'].append({'path': dest, 'state': 'file'})
+            diff['before'].append({'path': '{}/{}'.format(path, volume), 'state': 'file'})
 
-        diff['after'].append({'path': dest, 'state': 'file'})
         changed = changed or result
 
-    return {'changed': changed, 'diff': diff}
+    return {'changed': changed}
 
 
 def main():

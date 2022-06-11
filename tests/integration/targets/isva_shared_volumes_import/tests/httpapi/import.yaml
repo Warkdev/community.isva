@@ -1,0 +1,77 @@
+---
+- name: Cleaning file
+  file:
+    path: /tmp/isva_10.0.3.1_published.snapshot
+    state: absent
+
+- name: Importing non-existing file
+  community.isva.isva_shared_volumes_import:
+    path: snapshots
+    name: isva_10.0.3.1_published.snapshot
+    src: /tmp/isva_10.0.3.1_published.snapshot
+  register: imported
+  ignore_errors: True
+
+- assert:
+    that:
+      - imported.failed
+      - imported.msg == 'The source file is not valid /tmp/isva_10.0.3.1_published.snapshot'
+
+- name: Importing invalid path
+  community.isva.isva_shared_volumes_import:
+    path: snapshot
+    name: isva_10.0.3.1_published.snapshot
+    src: /tmp/isva_10.0.3.1_published.snapshot
+  register: imported
+  ignore_errors: True
+
+- assert:
+    that:
+      - imported.failed
+      - "imported.msg == 'value of path must be one of: fixpacks, snapshots, support, got: snapshot'"
+
+- name: Downloading file
+  community.isva.isva_shared_volumes_fetch:
+    path: snapshots
+    name: isva_10.0.3.1_published.snapshot
+    dest: /tmp/isva_10.0.3.1_published.snapshot
+
+- name: Importing file already existing
+  community.isva.isva_shared_volumes_import:
+    path: snapshots
+    name: isva_10.0.3.1_published.snapshot
+    src: /tmp/isva_10.0.3.1_published.snapshot
+  register: imported
+
+- assert:
+    that:
+      - not imported.changed
+
+- name: Importing file already existing with another name
+  community.isva.isva_shared_volumes_import:
+    path: snapshots
+    name: isva_10.0.3.1_import_published.snapshot
+    src: /tmp/isva_10.0.3.1_published.snapshot
+  register: imported
+  ignore_errors: True
+
+- assert:
+    that:
+      #- imported.changed
+      - imported.failed
+      - imported.msg == 'This function is not supported yet'
+
+- name: Importing file already existing with overwrite
+  community.isva.isva_shared_volumes_import:
+    path: snapshots
+    name: isva_10.0.3.1_import_published.snapshot
+    src: /tmp/isva_10.0.3.1_published.snapshot
+    overwrite: True
+  ignore_errors: True
+  register: imported
+
+- assert:
+    that:
+      #- not imported.changed
+      - imported.failed
+      - imported.msg == 'This function is not supported yet'

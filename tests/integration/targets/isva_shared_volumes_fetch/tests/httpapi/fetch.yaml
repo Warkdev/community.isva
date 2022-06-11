@@ -2,7 +2,7 @@
 - name: Downloading wrong path
   community.isva.isva_shared_volumes_fetch:
     path: snapshot
-    file: isva_10.0.3.1_published.snapshot
+    name: isva_10.0.3.1_published.snapshot
     dest: /tmp/isva_10.0.3.1_published.snapshot
   register: fetched
   ignore_errors: True
@@ -14,7 +14,7 @@
 - name: Downloading non-existing file
   community.isva.isva_shared_volumes_fetch:
     path: snapshots
-    file: isva_9.0.0.0_published.snapshot
+    name: isva_9.0.0.0_published.snapshot
     dest: /tmp/isva_9.0.0.0_published.snapshot
   register: fetched
   ignore_errors: True
@@ -38,7 +38,7 @@
 - name: Downloading ISVA Shared Volume
   community.isva.isva_shared_volumes_fetch:
     path: snapshots
-    file: isva_10.0.3.1_published.snapshot
+    name: isva_10.0.3.1_published.snapshot
     dest: /tmp/isva_10.0.3.1_published.snapshot
   register: fetched
 
@@ -56,7 +56,7 @@
 - name: Re-downloading ISVA Shared Volume, idempotency
   community.isva.isva_shared_volumes_fetch:
     path: snapshots
-    file: isva_10.0.3.1_published.snapshot
+    name: isva_10.0.3.1_published.snapshot
     dest: /tmp/isva_10.0.3.1_published.snapshot
   register: fetched
 

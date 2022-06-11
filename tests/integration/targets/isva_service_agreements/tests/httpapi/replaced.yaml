@@ -1,8 +1,6 @@
 ---
 - name: Gathering current state of service agreements
-  community.isva.isva_service_agreements:
-    state: gathered
-  register: current
+  community.isva.isva_service_agreement_facts:
 
 - name: Accepting ISVA service agreements
   community.isva.isva_service_agreements:
@@ -15,11 +13,11 @@
       - result.changed | bool == True
       - result.diff.before.accepted | bool == False
       - result.diff.after.accepted | bool == True
-  when: current.gathered.accepted | bool == False
+  when: isva_service_agreements_accepted | bool == False
 
 - assert:
     that:
       - result.changed | bool == False
       - result.diff.before.accepted | bool == True
       - result.diff.after.accepted | bool == True
-  when: current.gathered.accepted | bool
+  when: isva_service_agreements_accepted | bool
