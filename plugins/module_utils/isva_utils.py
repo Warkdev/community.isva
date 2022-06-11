@@ -7,6 +7,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import os
 import logging
 import logging.config
 
@@ -94,3 +95,13 @@ def convert_filesystem_to_dict(filesystem):
             ret[entry['name']] = entry
 
     return ret
+
+
+def identical_files(module, src, dest):  # Compare 2 files based on their checksum.
+    if not os.path.isfile(src) or not os.path.isfile(dest):
+        return False
+
+    sha_src = module.sha256(src)
+    sha_dest = module.sha256(dest)
+
+    return sha_src == sha_dest

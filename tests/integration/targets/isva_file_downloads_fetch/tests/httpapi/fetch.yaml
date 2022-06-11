@@ -1,0 +1,132 @@
+---
+- name: Downloading non-existing file
+  community.isva.isva_file_downloads_fetch:
+    path: /common/database/db2/runtime/isam_access_control_db21.sql
+    dest: /tmp/isam_access_control_db2.sql
+  register: fetched
+  ignore_errors: True
+
+- assert:
+    that:
+      - fetched.failed
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isam_access_control_db2.sql
+  register: stat_result
+
+- assert:
+    that:
+      - fetched.failed
+      - fetched.msg == 'The requested file does not exist /common/database/db2/runtime/isam_access_control_db21.sql'
+      - not stat_result.stat.exists
+
+- name: Removing file
+  file:
+    path: /tmp/isam_access_control_db2.sql
+    state: absent
+
+- name: Downloading ISVA File Download
+  community.isva.isva_file_downloads_fetch:
+    path: /common/database/db2/runtime/isam_access_control_db2.sql
+    dest: /tmp/isam_access_control_db2.sql
+  register: fetched
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isam_access_control_db2.sql
+    checksum_algorithm: sha256
+  register: stat_result
+
+- assert:
+    that:
+    - fetched.changed
+    - stat_result.stat.exists
+
+- name: Re-downloading ISVA File Download, idempotency
+  community.isva.isva_file_downloads_fetch:
+    path: /common/database/db2/runtime/isam_access_control_db2.sql
+    dest: /tmp/isam_access_control_db2.sql
+  register: fetched
+
+- assert:
+    that:
+    - not fetched.changed
+
+- name: Removing file
+  file:
+    path: /tmp/isam_access_control_db2.sql
+    state: absent
+
+- name: Removing file
+  file:
+    path: /tmp/isam_access_control_db2_update_v8004.sql
+    state: absent
+
+- name: Downloading ISVA File Downloads through list
+  community.isva.isva_file_downloads_fetch:
+    files:
+    - path: /common/database/db2/runtime/isam_access_control_db2.sql
+      dest: /tmp/isam_access_control_db2.sql
+    - path: /common/database/db2/runtime/isam_access_control_db2_update_v8004.sql
+      dest: /tmp/isam_access_control_db2_update_v8004.sql
+  register: fetched
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isam_access_control_db2.sql
+  register: stat_result
+
+- assert:
+    that:
+    - fetched.changed
+    - stat_result.stat.exists
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isam_access_control_db2_update_v8004.sql
+  register: stat_result
+
+- assert:
+    that:
+    - fetched.changed
+    - stat_result.stat.exists
+
+- name: Downloading ISVA File Downloads through list for idempotency
+  community.isva.isva_file_downloads_fetch:
+    files:
+    - path: /common/database/db2/runtime/isam_access_control_db2.sql
+      dest: /tmp/isam_access_control_db2.sql
+    - path: /common/database/db2/runtime/isam_access_control_db2_update_v8004.sql
+      dest: /tmp/isam_access_control_db2_update_v8004.sql
+  register: fetched
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isam_access_control_db2.sql
+  register: stat_result
+
+- assert:
+    that:
+    - not fetched.changed
+    - stat_result.stat.exists
+
+- name: Removing file
+  file:
+    path: /tmp/isam_access_control_db2.sql
+    state: absent
+
+- name: Retrieving stat of file
+  stat:
+    path: /tmp/isam_access_control_db2_update_v8004.sql
+  register: stat_result
+
+- assert:
+    that:
+    - not fetched.changed
+    - stat_result.stat.exists
+
+- name: Removing file
+  file:
+    path: /tmp/isam_access_control_db2_update_v8004.sql
+    state: absent
